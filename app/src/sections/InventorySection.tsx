@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Product } from '@/types';
+import type { Product, ProductCategoryName } from '@/types';
 import { toast } from 'sonner';
 
 interface InventorySectionProps {
@@ -99,7 +99,7 @@ export default function InventorySection({
       id: Date.now().toString(),
       name: productForm.name,
       sku: productForm.sku,
-      category: productForm.category,
+      category: productForm.category as ProductCategoryName,
       price: parseFloat(productForm.price),
       stock: parseInt(productForm.stock),
       minStock: parseInt(productForm.minStock) || 5,
@@ -118,7 +118,7 @@ export default function InventorySection({
       ...editingProduct,
       name: productForm.name,
       sku: productForm.sku,
-      category: productForm.category,
+      category: productForm.category as ProductCategoryName,
       price: parseFloat(productForm.price),
       stock: parseInt(productForm.stock),
       minStock: parseInt(productForm.minStock) || 5,

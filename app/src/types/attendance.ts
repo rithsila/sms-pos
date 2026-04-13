@@ -132,7 +132,7 @@ export interface AttendanceSummary {
 export interface BulkOperation {
   ids: string[];
   action: 'delete' | 'update' | 'export';
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 // API Response Types

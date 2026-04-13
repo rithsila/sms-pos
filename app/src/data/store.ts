@@ -1,4 +1,4 @@
-import type { Income, Expense, Product, Staff, Attendance, ProductCategory, TelegramMessage, DashboardStats, MonthlyData } from '@/types';
+import type { Income, Expense, Product, Staff, ProductCategory, TelegramMessage, DashboardStats, MonthlyData } from '@/types';
 
 // Monthly fixed expenses based on user's data
 export const fixedMonthlyExpenses = {
@@ -58,20 +58,6 @@ export const sampleStaff: Staff[] = [
   { id: '4', name: 'Sarah Williams', role: 'Cashier', email: 'sarah@shop.com', phone: '+1234567893', performance: 90, salesThisMonth: 2900, attendance: 96, joinedDate: '2023-06-01' },
   { id: '5', name: 'Tom Brown', role: 'Stock Keeper', email: 'tom@shop.com', phone: '+1234567894', performance: 85, salesThisMonth: 0, attendance: 94, joinedDate: '2023-08-15' },
   { id: '6', name: 'Emily Davis', role: 'Sales Associate', email: 'emily@shop.com', phone: '+1234567895', performance: 78, salesThisMonth: 2600, attendance: 90, joinedDate: '2023-10-01' },
-];
-
-// Sample Attendance Data
-export const sampleAttendance: Attendance[] = [
-  { id: '1', staffId: '1', date: '2024-01-15', status: 'present', checkIn: '08:00', checkOut: '17:00', hoursWorked: 9 },
-  { id: '2', staffId: '2', date: '2024-01-15', status: 'present', checkIn: '08:15', checkOut: '17:15', hoursWorked: 9 },
-  { id: '3', staffId: '3', date: '2024-01-15', status: 'late', checkIn: '09:00', checkOut: '17:00', hoursWorked: 8, notes: 'Traffic delay' },
-  { id: '4', staffId: '4', date: '2024-01-15', status: 'present', checkIn: '08:00', checkOut: '16:30', hoursWorked: 8.5 },
-  { id: '5', staffId: '5', date: '2024-01-15', status: 'present', checkIn: '07:45', checkOut: '16:45', hoursWorked: 9 },
-  { id: '6', staffId: '6', date: '2024-01-15', status: 'leave', notes: 'Sick leave' },
-  { id: '7', staffId: '1', date: '2024-01-16', status: 'present', checkIn: '08:00', checkOut: '17:00', hoursWorked: 9 },
-  { id: '8', staffId: '2', date: '2024-01-16', status: 'present', checkIn: '08:00', checkOut: '17:00', hoursWorked: 9 },
-  { id: '9', staffId: '3', date: '2024-01-16', status: 'present', checkIn: '08:00', checkOut: '17:00', hoursWorked: 9 },
-  { id: '10', staffId: '4', date: '2024-01-16', status: 'absent', notes: 'Personal emergency' },
 ];
 
 // Sample Product Categories

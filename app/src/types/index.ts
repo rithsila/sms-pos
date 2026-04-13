@@ -16,11 +16,15 @@ export interface Expense {
   createdAt: string;
 }
 
+export type ProductCategoryName = 'Electronics' | 'Clothing' | 'Food & Beverage' | 'Home & Garden' | 'Sports' | 'Others';
+
+export type StaffRole = 'Manager' | 'Sales Associate' | 'Cashier' | 'Stock Keeper';
+
 export interface Product {
   id: string;
   name: string;
   sku: string;
-  category: string;
+  category: ProductCategoryName;
   price: number;
   stock: number;
   minStock: number;
@@ -31,7 +35,7 @@ export interface Product {
 export interface Staff {
   id: string;
   name: string;
-  role: string;
+  role: StaffRole;
   email: string;
   phone: string;
   avatar?: string;
@@ -39,17 +43,6 @@ export interface Staff {
   salesThisMonth: number;
   attendance: number;
   joinedDate: string;
-}
-
-export interface Attendance {
-  id: string;
-  staffId: string;
-  date: string;
-  status: 'present' | 'absent' | 'late' | 'leave';
-  checkIn?: string;
-  checkOut?: string;
-  hoursWorked?: number;
-  notes?: string;
 }
 
 export interface ProductCategory {
