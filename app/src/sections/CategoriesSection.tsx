@@ -32,6 +32,7 @@ import {
 import { sampleCategories } from '@/data/store';
 import type { ProductCategory } from '@/types';
 import { toast } from 'sonner';
+import { useConfirmDialog } from '@/components/common/ConfirmDialog';
 
 const iconMap: Record<string, React.ElementType> = {
   Smartphone,
@@ -43,6 +44,7 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 export default function CategoriesSection() {
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
   const [categories, setCategories] = useState<ProductCategory[]>(sampleCategories);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -89,8 +91,14 @@ export default function CategoriesSection() {
     toast.success('Category updated successfully!');
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
-    if (confirm('Are you sure you want to delete this category?')) {
+  const handleDeleteCategory = async (categoryId: string) => {
+    const ok = await confirm({
+      title: 'Delete category?',
+      description: 'This action cannot be undone. The category will be permanently removed.',
+      confirmLabel: 'Delete category',
+      variant: 'destructive',
+    });
+    if (ok) {
       setCategories(categories.filter(cat => cat.id !== categoryId));
       toast.success('Category deleted successfully!');
     }
@@ -122,6 +130,7 @@ export default function CategoriesSection() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
+      {confirmDialog}
       {/* Header */}
       <div className="mb-8 animate-fadeInDown">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -163,7 +172,10 @@ export default function CategoriesSection() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <button className="p-2 rounded-lg hover:bg-background opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        aria-label="Category actions"
+                        className="p-2 rounded-lg hover:bg-background opacity-100 md:opacity-40 md:group-hover:opacity-100 transition-opacity"
+                      >
                         <MoreVertical className="w-4 h-4 text-muted-foreground" />
                       </button>
                     </DropdownMenuTrigger>

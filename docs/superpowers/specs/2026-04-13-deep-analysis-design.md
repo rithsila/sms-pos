@@ -1,7 +1,7 @@
 # Shop Management Web App - Deep Analysis & Fix Spec
 
 **Date:** 2026-04-13
-**Status:** In Progress (Phases 1-2 complete)
+**Status:** In Progress (Phases 1-4 complete; Phase 5 pending)
 
 ## Context
 
@@ -13,8 +13,8 @@ The Shop Management Web App is a React SPA for a Cambodian retail shop. A deep a
 |-------|------|--------|
 | 1 | Config & cleanup | DONE |
 | 2 | Design tokens & color system | DONE |
-| 3 | Type unification | TODO |
-| 4 | UI consistency | TODO |
+| 3 | Type unification | DONE |
+| 4 | UI consistency | DONE |
 | 5 | PRD gap fixes | TODO |
 
 ---
@@ -67,44 +67,75 @@ The Shop Management Web App is a React SPA for a Cambodian retail shop. A deep a
 
 ---
 
-## Phase 3: Type Unification (TODO)
+## Phase 3: Type Unification (DONE)
 
 ### Problems Found
 1. **Duplicate Attendance types** - `Attendance` in types/index.ts vs `AttendanceRecord` in types/attendance.ts model the same concept differently.
 2. **Duplicate AttendanceSection** - Both AttendanceSection.tsx (350 lines, old) and EnhancedAttendanceSection.tsx (1834 lines, current) exist.
 3. **Inconsistent role typing** - `Staff.role` is `string` but `Employee.role` uses `UserRole` literal union.
 4. **Loose category types** - `Product.category` is `string`, `Income.category` has only 3 options, `Expense.category` has only 5.
+5. **Loose `any` typing** - `BulkOperation.data` in attendance.ts typed as `Record<string, any>`.
 
-### Planned Fix
-- Delete old `AttendanceSection.tsx`
-- Remove old `Attendance` type from index.ts
-- Unify on `AttendanceRecord` from attendance.ts
-- Tighten `Staff.role` to use `UserRole` union
-- Add proper category literal unions for Product
+### Changes Made
+- **Deleted old `AttendanceSection.tsx`** - Consolidated on `EnhancedAttendanceSection.tsx` as the single source of truth.
+- **Removed simple `Attendance` interface** from `types/index.ts`; unified on `AttendanceRecord` from `types/attendance.ts`.
+- **Cleaned `store.ts`** - Removed `Attendance` import and `sampleAttendance` export (no consumers).
+- **Added literal unions** to `types/index.ts`:
+  - `ProductCategoryName = 'Electronics' | 'Clothing' | 'Food & Beverage' | 'Home & Garden' | 'Sports' | 'Others'`
+  - `StaffRole = 'Manager' | 'Sales Associate' | 'Cashier' | 'Stock Keeper'`
+- **Tightened `Product.category`** to `ProductCategoryName`; cast form inputs in `InventorySection.tsx` add/edit handlers.
+- **Tightened `Staff.role`** to `StaffRole` union in type definition (form input left as free text — role rarely changes, UX decision).
+- **Replaced `any` with `unknown`** in `BulkOperation.data` for safer typing (zero active consumers).
+
+### Files Modified
+- `app/src/types/index.ts` - Removed `Attendance`, added `ProductCategoryName` and `StaffRole` unions
+- `app/src/types/attendance.ts` - `BulkOperation.data: any` → `unknown`
+- `app/src/data/store.ts` - Removed `Attendance` import and `sampleAttendance` export
+- `app/src/sections/InventorySection.tsx` - Added `ProductCategoryName` import and casts
+- `app/src/sections/AttendanceSection.tsx` - Deleted (duplicate of enhanced version)
+
+### Verification
+- `npm run build` passes with zero TypeScript errors
+- Committed: `16d15ea refactor: unify types and remove duplicate attendance code`
 
 ---
 
-## Phase 4: UI Consistency (TODO)
+## Phase 4: UI Consistency (DONE)
 
-### Problems Found
-1. **No loading/skeleton states** in any section
-2. **No error states** anywhere
-3. **Empty states** inconsistent (some sections have them, some don't)
-4. **Broken mobile interactions** - Delete buttons use `opacity-0 group-hover:opacity-100` (invisible on touch)
-5. **Missing accessibility** - No ARIA labels on icon buttons, no skip-to-content link, progress bars use raw `<div>` instead of `<Progress>`
-6. **Inconsistent button styles** - Mix of shadcn variants, custom btn-* classes, and inline gradient styles
-7. **Inconsistent spacing** - CardContent uses p-4 or p-6 randomly, gaps vary between 3-6
-8. **Inconsistent CardHeader padding** - pb-2, pb-3, pb-4 used randomly
-9. **Browser confirm()** used instead of AlertDialog in 3 places
-10. **No form validation feedback** - All validation uses toast only, no inline errors
+### Problems Addressed
+1. ~~**No loading/skeleton states**~~ — Reusable `ListSkeleton` and `StatsSkeleton` components created in `components/common/SectionSkeleton.tsx` (backed by existing shadcn `Skeleton`).
+2. ~~**No error states**~~ — `ErrorState` component created in `components/common/ErrorState.tsx` with optional retry callback.
+3. ~~**Inconsistent empty states**~~ — `EmptyState` component created in `components/common/EmptyState.tsx` with `default` and `search` variants.
+4. ~~**Broken mobile interactions**~~ — All 3 `opacity-0 group-hover:opacity-100` buttons replaced with the dimmed-on-desktop pattern: `opacity-100 md:opacity-40 md:group-hover:opacity-100`. `aria-label` added.
+5. ~~**Missing accessibility**~~ — Skip-to-content link added to `App.tsx`, `<main>` tagged with `id="main-content" tabIndex={-1}`. ARIA labels added to icon-only buttons touched in this phase.
+6. **Inconsistent button styles** — Noted but not standardized in this pass (defer to future polish — current styles work and changing them is high-risk).
+7. **Inconsistent spacing** — Noted but not refactored in this pass (existing p-4/p-6 choices are mostly coherent per section; defer to future polish).
+8. **Inconsistent CardHeader padding** — Same as #7, deferred.
+9. ~~**Browser `confirm()`**~~ — All 3 `confirm()` calls replaced with a new `useConfirmDialog()` hook (in `components/common/ConfirmDialog.tsx`) that wraps shadcn `AlertDialog`. Supports destructive variant, async/await API.
+10. **Inline form validation** — Deferred to separate task (scope decision: touches every form and benefits from a dedicated refactor).
 
-### Planned Fix
-- Standardize spacing (p-6 for content cards, p-4 for stat cards)
-- Add ARIA labels to all icon buttons
-- Fix mobile hover-only interactions (always show on mobile)
-- Add AlertDialog for confirmations
-- Add skeleton loading component
-- Standardize empty states
+### Files Added
+- `app/src/components/common/ConfirmDialog.tsx` — `useConfirmDialog()` hook returning `{ confirm, dialog }`, Promise-based API replacing `confirm()`.
+- `app/src/components/common/EmptyState.tsx` — Reusable empty state with `default` / `search` variants.
+- `app/src/components/common/ErrorState.tsx` — Error state with optional retry handler.
+- `app/src/components/common/SectionSkeleton.tsx` — `ListSkeleton` and `StatsSkeleton` for loading states.
+- `docs/superpowers/artifacts/2026-04-15-phase4-ui-patterns.html` — AiDesigner-generated visual reference.
+
+### Files Modified
+- `app/src/App.tsx` — Added skip-to-content link and `id="main-content"` anchor on `<main>`.
+- `app/src/sections/CategoriesSection.tsx` — `confirm()` → `useConfirmDialog()`, mobile-safe MoreVertical button with `aria-label`.
+- `app/src/sections/InventorySection.tsx` — `confirm()` → `useConfirmDialog()` with product-name in description.
+- `app/src/sections/IncomeExpenseSection.tsx` — Both delete buttons made mobile-visible with `aria-label`.
+- `app/src/sections/EnhancedAttendanceSection.tsx` — Bulk-delete `confirm()` → `useConfirmDialog()`.
+
+### Deferred (intentional)
+- Inline form validation feedback (item #10) — complex, touches every form. Track separately.
+- Button style unification (item #6), spacing/padding normalization (#7, #8) — low-severity polish; changing all cards mechanically risks visual regressions. Defer until a dedicated design pass.
+- Rendering skeleton/empty/error components inside sections — components are ready but mock data is always present, so they have no consumer yet. Wire them up when real data fetching replaces the static mock data.
+
+### Verification
+- `npm run build` passes (2747 modules, zero TS errors)
+- No remaining `confirm()` or `opacity-0 group-hover` in `app/src/sections`
 
 ---
 

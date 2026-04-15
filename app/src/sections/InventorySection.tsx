@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import type { Product, ProductCategoryName } from '@/types';
 import { toast } from 'sonner';
+import { useConfirmDialog } from '@/components/common/ConfirmDialog';
 
 interface InventorySectionProps {
   products: Product[];
@@ -45,6 +46,7 @@ export default function InventorySection({
   onUpdateProduct, 
   onDeleteProduct 
 }: InventorySectionProps) {
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -130,8 +132,17 @@ export default function InventorySection({
     setEditingProduct(null);
   };
 
-  const handleDeleteProduct = (productId: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
+  const handleDeleteProduct = async (productId: string) => {
+    const product = products.find((p) => p.id === productId);
+    const ok = await confirm({
+      title: 'Delete product?',
+      description: product
+        ? `This action cannot be undone. "${product.name}" will be permanently removed.`
+        : 'This action cannot be undone. The product will be permanently removed.',
+      confirmLabel: 'Delete product',
+      variant: 'destructive',
+    });
+    if (ok) {
       onDeleteProduct(productId);
     }
   };
@@ -169,6 +180,7 @@ export default function InventorySection({
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
+      {confirmDialog}
       {/* Header */}
       <div className="mb-8 animate-fadeInDown">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

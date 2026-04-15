@@ -151,6 +151,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Skip to main content link (a11y) */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        Skip to main content
+      </a>
       {/* Navigation Bar */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -289,7 +296,7 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="pt-16 min-h-screen">
+      <main id="main-content" tabIndex={-1} className="pt-16 min-h-screen focus:outline-none">
         <div className="animate-fadeIn">
           {renderSection()}
         </div>

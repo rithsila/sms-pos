@@ -316,7 +316,10 @@ export default function IncomeExpenseSection({
                         <span className="text-lg font-bold text-success">
                           +{formatCurrency(income.amount)}
                         </span>
-                        <button className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-all">
+                        <button
+                          aria-label="Delete record"
+                          className="opacity-100 md:opacity-40 md:group-hover:opacity-100 p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-all"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -363,7 +366,10 @@ export default function IncomeExpenseSection({
                         <span className="text-lg font-bold text-destructive">
                           -{formatCurrency(expense.amount)}
                         </span>
-                        <button className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-all">
+                        <button
+                          aria-label="Delete record"
+                          className="opacity-100 md:opacity-40 md:group-hover:opacity-100 p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-all"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

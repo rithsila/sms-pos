@@ -62,6 +62,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { useConfirmDialog } from '@/components/common/ConfirmDialog';
 import type { 
   Employee, 
   Position, 
@@ -159,6 +160,7 @@ const QRCodeDisplay = ({ employee, onDownload }: { employee: Employee; onDownloa
 );
 
 export default function EnhancedAttendanceSection() {
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
   // Current user role (simulated - in real app would come from auth context)
   const currentUserRole: UserRole = 'admin';
   const currentUserId = 'emp-1';
@@ -392,13 +394,20 @@ export default function EnhancedAttendanceSection() {
     toast.success(approve ? 'Leave approved!' : 'Leave rejected!');
   };
   
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedRecords.length === 0) {
       toast.error('Please select records to delete');
       return;
     }
-    
-    if (confirm(`Are you sure you want to delete ${selectedRecords.length} records?`)) {
+
+    const ok = await confirm({
+      title: `Delete ${selectedRecords.length} record${selectedRecords.length === 1 ? '' : 's'}?`,
+      description: 'This action cannot be undone. The selected attendance records will be permanently removed.',
+      confirmLabel: 'Delete',
+      variant: 'destructive',
+    });
+
+    if (ok) {
       // In real app, would delete from backend
       toast.success(`${selectedRecords.length} records deleted!`);
       setSelectedRecords([]);
@@ -455,6 +464,7 @@ export default function EnhancedAttendanceSection() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+      {confirmDialog}
       {/* Header */}
       <div className="mb-6 animate-fadeInDown">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
