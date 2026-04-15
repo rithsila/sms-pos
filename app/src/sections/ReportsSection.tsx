@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { 
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ import {
 import type { Income, Expense, Product, Staff } from '@/types';
 import { sampleMonthlyData } from '@/data/store';
 import { toast } from 'sonner';
+import { downloadCsv } from '@/lib/csvExport';
 
 interface ReportsSectionProps {
   incomes: Income[];
@@ -106,7 +108,41 @@ export default function ReportsSection({ incomes, expenses, products, staff }: R
   }, [] as { name: string; value: number }[]);
 
   const handleExport = (format: string) => {
-    toast.success(`Report exported as ${format.toUpperCase()}`);
+    if (format !== 'csv') {
+      toast.info(`${format.toUpperCase()} export coming soon`);
+      return;
+    }
+
+    const timestamp = new Date().toISOString().split('T')[0];
+
+    const incomeRows = incomes.map((i) => ({
+      id: i.id,
+      date: i.date,
+      category: i.category,
+      amount: i.amount,
+      description: i.description,
+    }));
+    const expenseRows = expenses.map((e) => ({
+      id: e.id,
+      date: e.date,
+      category: e.category,
+      amount: e.amount,
+      description: e.description,
+    }));
+    const productRows = products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      sku: p.sku,
+      category: p.category,
+      price: p.price,
+      stock: p.stock,
+      minStock: p.minStock,
+    }));
+
+    downloadCsv(`income-${timestamp}`, incomeRows);
+    downloadCsv(`expenses-${timestamp}`, expenseRows);
+    downloadCsv(`products-${timestamp}`, productRows);
+    toast.success('CSV reports downloaded (income, expenses, products)');
   };
 
   return (
@@ -131,9 +167,9 @@ export default function ReportsSection({ incomes, expenses, products, staff }: R
                 <SelectItem value="365">Last Year</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => handleExport('pdf')}>
+            <Button variant="outline" onClick={() => handleExport('csv')}>
               <Download className="w-4 h-4 mr-2" />
-              Export
+              Export CSV
             </Button>
           </div>
         </div>
@@ -488,17 +524,19 @@ export default function ReportsSection({ incomes, expenses, products, staff }: R
                 <CardTitle>Export Options</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('pdf')}>
-                  <FileText className="w-4 h-4 mr-2 text-destructive" />
-                  Export as PDF
-                </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('excel')}>
-                  <BarChart3 className="w-4 h-4 mr-2 text-success" />
-                  Export as Excel
-                </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('csv')}>
                   <Download className="w-4 h-4 mr-2 text-primary" />
                   Export as CSV
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('pdf')} disabled>
+                  <FileText className="w-4 h-4 mr-2 text-destructive" />
+                  Export as PDF
+                  <Badge variant="secondary" className="ml-auto text-[10px]">Soon</Badge>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('excel')} disabled>
+                  <BarChart3 className="w-4 h-4 mr-2 text-success" />
+                  Export as Excel
+                  <Badge variant="secondary" className="ml-auto text-[10px]">Soon</Badge>
                 </Button>
               </CardContent>
             </Card>

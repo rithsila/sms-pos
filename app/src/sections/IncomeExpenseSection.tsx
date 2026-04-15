@@ -1,14 +1,15 @@
-import { useState } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Plus, 
-  Calendar, 
-  Tag, 
+import { useState, useEffect } from 'react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Plus,
+  Calendar,
+  Tag,
   Trash2,
   DollarSign,
   Search,
-  Filter
+  Filter,
+  Pencil,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,33 @@ export default function IncomeExpenseSection({
   const [searchTerm, setSearchTerm] = useState('');
   const [isIncomeDialogOpen, setIsIncomeDialogOpen] = useState(false);
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
+  const [isFixedExpensesDialogOpen, setIsFixedExpensesDialogOpen] = useState(false);
+  const [fixedExpenses, setFixedExpenses] = useState<{ key: string; label: string; amount: number }[]>(() => {
+    try {
+      const stored = typeof window !== 'undefined' ? window.localStorage.getItem('sms.fixedExpenses.v1') : null;
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // ignore malformed storage
+    }
+    return [
+      { key: 'rent', label: 'Rent', amount: 680 },
+      { key: 'staffSalary', label: 'Staff Salary (4)', amount: 720 },
+      { key: 'electricity', label: 'Electricity', amount: 800 },
+      { key: 'franchiseFee', label: 'Franchise Fee', amount: 117 },
+      { key: 'otherExpenses', label: 'Other Expenses', amount: 200 },
+      { key: 'garbageInternet', label: 'Garbage & Internet', amount: 45 },
+      { key: 'staffBenefits', label: 'Staff Benefits', amount: 60 },
+    ];
+  });
+  const fixedExpensesTotal = fixedExpenses.reduce((sum, item) => sum + item.amount, 0);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('sms.fixedExpenses.v1', JSON.stringify(fixedExpenses));
+    } catch {
+      // ignore storage errors (quota, private mode)
+    }
+  }, [fixedExpenses]);
 
   // Form states
   const [incomeForm, setIncomeForm] = useState<{
@@ -584,45 +612,35 @@ export default function IncomeExpenseSection({
           {/* Monthly Fixed Expenses Info */}
           <Card className="card-hover animate-fadeIn" style={{ animationDelay: '700ms' }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <Tag className="w-5 h-5 text-primary" />
-                Fixed Monthly Expenses
-              </CardTitle>
+              <div className="flex items-center justify-between w-full">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <Tag className="w-5 h-5 text-primary" />
+                  Fixed Monthly Expenses
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsFixedExpensesDialogOpen(true)}
+                  aria-label="Edit fixed monthly expenses"
+                  className="gap-1"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Rent</span>
-                  <span className="font-medium">$680.00</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Staff Salary (4)</span>
-                  <span className="font-medium">$720.00</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Electricity</span>
-                  <span className="font-medium">$800.00</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Franchise Fee</span>
-                  <span className="font-medium">$117.00</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Other Expenses</span>
-                  <span className="font-medium">$200.00</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Garbage & Internet</span>
-                  <span className="font-medium">$45.00</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Staff Benefits</span>
-                  <span className="font-medium">$60.00</span>
-                </div>
+                {fixedExpenses.map((item) => (
+                  <div key={item.key} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{item.label}</span>
+                    <span className="font-medium">{formatCurrency(item.amount)}</span>
+                  </div>
+                ))}
                 <div className="pt-3 border-t border-border">
                   <div className="flex justify-between">
                     <span className="font-semibold text-foreground">Total Fixed</span>
-                    <span className="font-bold text-destructive">$2,622.00</span>
+                    <span className="font-bold text-destructive">{formatCurrency(fixedExpensesTotal)}</span>
                   </div>
                 </div>
               </div>
@@ -630,6 +648,49 @@ export default function IncomeExpenseSection({
           </Card>
         </div>
       </div>
+
+      {/* Edit Fixed Expenses Dialog */}
+      <Dialog open={isFixedExpensesDialogOpen} onOpenChange={setIsFixedExpensesDialogOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Edit Fixed Monthly Expenses</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {fixedExpenses.map((item, index) => (
+              <div key={item.key} className="grid grid-cols-[1fr_auto] gap-3 items-center">
+                <Label htmlFor={`fixed-${item.key}`} className="text-sm">
+                  {item.label}
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                  <Input
+                    id={`fixed-${item.key}`}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={item.amount}
+                    onChange={(e) => {
+                      const next = [...fixedExpenses];
+                      next[index] = { ...item, amount: Number(e.target.value) || 0 };
+                      setFixedExpenses(next);
+                    }}
+                    className="w-32 pl-7"
+                  />
+                </div>
+              </div>
+            ))}
+            <div className="flex justify-between pt-3 border-t border-border">
+              <span className="font-semibold">Total</span>
+              <span className="font-bold text-destructive">{formatCurrency(fixedExpensesTotal)}</span>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsFixedExpensesDialogOpen(false)}>
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -82,15 +82,15 @@ export const sampleTelegramMessages: TelegramMessage[] = [
 // Sample Monthly Data for Charts
 export const sampleMonthlyData: MonthlyData[] = [
   { month: 'Jan', revenue: 8500, expenses: 6200, profit: 2300 },
-  { month: 'Feb', revenue: 9200, expenses: 6400, profit: 2800 },
-  { month: 'Mar', revenue: 8800, expenses: 6100, profit: 2700 },
-  { month: 'Apr', revenue: 10500, expenses: 6800, profit: 3700 },
+  { month: 'Feb', revenue: 7200, expenses: 6400, profit: 800 },
+  { month: 'Mar', revenue: 6800, expenses: 6900, profit: -100 },
+  { month: 'Apr', revenue: 9500, expenses: 6800, profit: 2700 },
   { month: 'May', revenue: 11200, expenses: 7000, profit: 4200 },
   { month: 'Jun', revenue: 10800, expenses: 6900, profit: 3900 },
   { month: 'Jul', revenue: 12500, expenses: 7500, profit: 5000 },
-  { month: 'Aug', revenue: 13200, expenses: 7800, profit: 5400 },
-  { month: 'Sep', revenue: 11800, expenses: 7200, profit: 4600 },
-  { month: 'Oct', revenue: 14200, expenses: 8200, profit: 6000 },
+  { month: 'Aug', revenue: 9800, expenses: 7800, profit: 2000 },
+  { month: 'Sep', revenue: 8400, expenses: 7200, profit: 1200 },
+  { month: 'Oct', revenue: 12200, expenses: 8200, profit: 4000 },
   { month: 'Nov', revenue: 13800, expenses: 8000, profit: 5800 },
   { month: 'Dec', revenue: 15500, expenses: 8500, profit: 7000 },
 ];

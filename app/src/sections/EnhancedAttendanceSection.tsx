@@ -63,6 +63,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { useConfirmDialog } from '@/components/common/ConfirmDialog';
+import { downloadCsv } from '@/lib/csvExport';
 import type { 
   Employee, 
   Position, 
@@ -415,7 +416,28 @@ export default function EnhancedAttendanceSection() {
   };
   
   const handleExport = (format: 'csv' | 'excel') => {
-    toast.success(`Data exported as ${format.toUpperCase()}!`);
+    if (format !== 'csv') {
+      toast.info('Excel export coming soon');
+      return;
+    }
+    const timestamp = new Date().toISOString().split('T')[0];
+    const rows = attendanceRecords.map((r) => ({
+      id: r.id,
+      employeeId: r.employeeId,
+      employeeName: r.employee?.name ?? '',
+      date: r.date,
+      status: r.status,
+      checkIn: r.checkIn ?? '',
+      checkOut: r.checkOut ?? '',
+      workingHours: r.workingHours ?? '',
+      notes: r.notes ?? '',
+    }));
+    if (rows.length === 0) {
+      toast.error('No attendance records to export');
+      return;
+    }
+    downloadCsv(`attendance-${timestamp}`, rows);
+    toast.success(`Exported ${rows.length} attendance records`);
   };
   
   const handleDownloadQR = (employee: Employee) => {
@@ -483,9 +505,10 @@ export default function EnhancedAttendanceSection() {
               <FileText className="w-4 h-4 mr-2" />
               Export CSV
             </Button>
-            <Button variant="outline" onClick={() => handleExport('excel')}>
+            <Button variant="outline" onClick={() => handleExport('excel')} disabled>
               <FileSpreadsheet className="w-4 h-4 mr-2" />
               Export Excel
+              <Badge variant="secondary" className="ml-2 text-[10px]">Soon</Badge>
             </Button>
           </div>
         </div>
@@ -1221,8 +1244,9 @@ export default function EnhancedAttendanceSection() {
                 <CardTitle className="flex items-center gap-2">
                   <QrCode className="w-5 h-5 text-primary" />
                   Staff Check-in QR Code
+                  <Badge variant="secondary" className="ml-auto text-[10px]">Demo</Badge>
                 </CardTitle>
-                <CardDescription>Scan this QR code to check in or check out</CardDescription>
+                <CardDescription>Camera scanning is not yet wired up — use the simulator below to test check-in/out.</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 <div className="w-64 h-64 bg-white rounded-2xl border-4 border-primary/20 flex items-center justify-center mb-6 p-4">

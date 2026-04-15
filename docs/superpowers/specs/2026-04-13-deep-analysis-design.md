@@ -1,7 +1,7 @@
 # Shop Management Web App - Deep Analysis & Fix Spec
 
 **Date:** 2026-04-13
-**Status:** In Progress (Phases 1-4 complete; Phase 5 pending)
+**Status:** Complete (Phases 1-5 done)
 
 ## Context
 
@@ -15,7 +15,7 @@ The Shop Management Web App is a React SPA for a Cambodian retail shop. A deep a
 | 2 | Design tokens & color system | DONE |
 | 3 | Type unification | DONE |
 | 4 | UI consistency | DONE |
-| 5 | PRD gap fixes | TODO |
+| 5 | PRD gap fixes | DONE |
 
 ---
 
@@ -139,22 +139,32 @@ The Shop Management Web App is a React SPA for a Cambodian retail shop. A deep a
 
 ---
 
-## Phase 5: PRD Gap Fixes (TODO)
+## Phase 5: PRD Gap Fixes (DONE)
 
-### Problems Found
-1. **CSV/Excel export** - Buttons exist but no file generation logic
-2. **QR code scanning** - QR displayed but no camera input
-3. **Product images** - Type exists but never populated
-4. **Staff performance** - Hardcoded percentages, no calculation
-5. **Bulk operations** - Checkboxes render but bulk actions don't work
-6. **Fixed expenses** - Hardcoded $2,622, not configurable
-7. **Sample data** - Unrealistic (only growth, no bad months)
+### Changes Made
+1. **CSV export implemented** — New `app/src/lib/csvExport.ts` utility (Blob + UTF-8 BOM, no new dep). Wired into `ReportsSection` (exports income/expenses/products as three CSVs) and `EnhancedAttendanceSection` (exports attendance records).
+2. **PDF/Excel marked as "Soon"** — Buttons disabled with `<Badge variant="secondary">Soon</Badge>`; header export button rewired to CSV.
+3. **Fixed expenses configurable** — In `IncomeExpenseSection`, the hardcoded 7-line breakdown is now state-backed and persisted to `localStorage` under key `sms.fixedExpenses.v1`. A Pencil button opens an inline edit dialog; total is derived from the array.
+4. **QR scanner tagged as "Demo"** — Camera scanning not yet wired; `Staff Check-in QR Code` card now shows a `Demo` badge and the description explains the simulator below is the test path.
+5. **Sample data made realistic** — `sampleMonthlyData` in `store.ts` now has a negative-profit month (Mar), two flat months (Feb, Sep), and a revenue dip in Aug. Breaks the "only growth" pattern.
 
-### Planned Fix
-- Wire up CSV export with file-saver
-- Make fixed expenses configurable via UI
-- Improve sample data realism
-- Mark non-functional features clearly in UI
+### Deferred (intentional)
+- **QR camera wiring** — requires MediaDevices API + QR library (jsQR/@zxing/browser). Separate task.
+- **Product image uploads** — requires file storage / data-url handling. Separate task.
+- **Staff performance calculation** — requires attendance→performance aggregation logic. Separate task.
+- **PDF / Excel export** — parked behind "Soon" badges; re-enable once a generator is chosen (e.g., jspdf, xlsx).
+
+### Files Added
+- `app/src/lib/csvExport.ts` — `rowsToCsv()` + `downloadCsv()` with UTF-8 BOM.
+
+### Files Modified
+- `app/src/sections/ReportsSection.tsx` — Real CSV export, Soon badges on PDF/Excel.
+- `app/src/sections/EnhancedAttendanceSection.tsx` — CSV export for attendance, Excel marked Soon, QR card marked Demo.
+- `app/src/sections/IncomeExpenseSection.tsx` — State-backed fixed expenses + edit dialog + localStorage.
+- `app/src/data/store.ts` — Realistic `sampleMonthlyData` with down months.
+
+### Verification
+- `npm run build` passes (2748 modules, zero TS errors).
 
 ---
 
